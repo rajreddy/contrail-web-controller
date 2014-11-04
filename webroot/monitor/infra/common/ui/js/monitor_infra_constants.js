@@ -35,6 +35,7 @@ var monitorInfraUrls = {
         VROUTER_UNICAST_ROUTES      : '/api/admin/monitor/infrastructure/vrouter/ucast-routes?ip={0}&vrfindex={1}',
         VROUTER_MCAST_ROUTES        : '/api/admin/monitor/infrastructure/vrouter/mcast-routes?ip={0}&vrfindex={1}',
         VROUTER_L2_ROUTES           : '/api/admin/monitor/infrastructure/vrouter/l2-routes?ip={0}&vrfindex={1}',
+        VROUTER_UCAST6_ROUTES       : '/api/admin/monitor/infrastructure/vrouter/ucast6-routes?ip={0}&vrfindex={1}',
         
         CONTROLNODE_SUMMARY         : '/api/admin/monitor/infrastructure/controlnodes/summary',
         CONTROLNODE_DETAILS         : '/api/admin/monitor/infrastructure/controlnode/details?hostname={0}',
@@ -57,16 +58,16 @@ var monitorInfraUrls = {
 }
 
 var UVEModuleIds = {
-        VROUTER_AGENT       : 'VRouterAgent',
-        CONTROLNODE         : 'ControlNode',
-        COLLECTOR           : 'Collector',
-        OPSERVER            : 'OpServer',
-        QUERYENGINE         : 'QueryEngine',
-        APISERVER           : 'ApiServer',
-        DISCOVERY_SERVICE   : 'DiscoveryService',
-        SERVICE_MONITOR     : 'ServiceMonitor',
-        SCHEMA              : 'Schema',
-        ANALYTICS_NODEMGR   : 'Contrail-Analytics-Nodemgr',
+        VROUTER_AGENT       : 'contrail-vrouter-agent',
+        CONTROLNODE         : 'contrail-control',
+        COLLECTOR           : 'contrail-collector',
+        OPSERVER            : 'contrail-analytics-api',
+        QUERYENGINE         : 'contrail-query-engine',
+        APISERVER           : 'contrail-api',
+        DISCOVERY_SERVICE   : 'contrail-discovery',
+        SERVICE_MONITOR     : 'contrail-svc-monitor',
+        SCHEMA              : 'contrail-schema',
+        ANALYTICS_NODEMGR   : 'contrail-analytics-nodemgr',
         CONFIG_NODE         : 'ConfigNode'
 }
 

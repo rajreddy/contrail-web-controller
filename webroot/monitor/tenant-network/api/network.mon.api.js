@@ -7,7 +7,7 @@ var cacheApi = require(process.mainModule.exports["corePath"] + '/src/serverroot
     messages = require(process.mainModule.exports["corePath"] + '/src/serverroot/common/messages'),
     commonUtils = require(process.mainModule.exports["corePath"] + '/src/serverroot/utils/common.utils'),
     tenantapi = require('./tenant.api'),
-    config = require(process.mainModule.exports["corePath"] + '/config/config.global.js'),
+    config = process.mainModule.exports["config"],
     rest = require(process.mainModule.exports["corePath"] + '/src/serverroot/common/rest.api'),
     async = require('async'),
     jsonPath = require('JSONPath').eval,
@@ -977,28 +977,28 @@ function getFlowSeriesByCPU (req, res)
     var url = '/flow_series/cpu';
     var key = null;
     switch (moduleId) {
-    case 'ControlNode':
+    case 'contrail-control':
         key = ctrlGlobal.STR_GET_CONTROL_NODE_CPU_FLOW_SERIES;
         break;
-    case 'vRouterAgent':
+    case 'contrail-vrouter-agent':
         key = ctrlGlobal.STR_GET_VROUTER_NODE_CPU_FLOW_SERIES;
         break;
-    case 'Collector':
+    case 'contrail-collector':
         key = ctrlGlobal.STR_GET_COLLECTOR_CPU_FLOW_SERIES;
         break;
-    case 'QueryEngine':
+    case 'contrail-query-engine':
         key = ctrlGlobal.STR_GET_QE_CPU_FLOW_SERIES;
         break;
-    case 'OpServer':
+    case 'contrail-analytics-api':
         key = ctrlGlobal.STR_GET_OPS_CPU_FLOW_SERIES;
         break;
-    case 'ApiServer':
+    case 'contrail-api':
         key = ctrlGlobal.STR_GET_API_SERVER_CPU_FLOW_SERIES;
         break;
-    case 'ServiceMonitor':
+    case 'contrail-svc-monitor':
         key = ctrlGlobal.STR_GET_SVC_MON_CPU_FLOW_SERIES;
         break;
-    case 'Schema':
+    case 'contrail-schema':
         key = ctrlGlobal.STR_GET_SCHEMA_FLOW_SERIES;
         break;
     default:
@@ -2517,7 +2517,7 @@ function getVNConfigList(configURL,appData,callback)
 {
     configApiServer.apiGet(configURL, appData, function(err, configVNData) {
         if (err || (null == configVNData)) {
-            callback(err, vnList);
+            callback(err, null);
             return;
         }
         if ((null != configVNData) && 
@@ -2658,13 +2658,15 @@ function getInstanceDetailsForAdmin(req,appData,callback) {
         if (null == type) {
             err = new
                 appErrors.RESTServerError('type is required');
-            callback(err,null);
+            callback(err,resultJSON);
+            return;
         }
         return getInstanceDetailsByFqn(req, appData, callback);
     }
     opApiServer.apiGet(url, appData, function(err, data) {
         if (err || (null == data)) {
-            callback(err,null);
+            callback(err,resultJSON);
+            return;
         }
         data.sort(infraCmn.sortUVEList);
         processInstanceReqByLastUUID(lastUUID, count, false, data, 

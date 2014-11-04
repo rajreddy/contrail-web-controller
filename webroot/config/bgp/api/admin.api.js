@@ -3,7 +3,7 @@
  */
 
 var rest = require(process.mainModule.exports["corePath"] + '/src/serverroot/common/rest.api'),
-    config = require(process.mainModule.exports["corePath"] + '/config/config.global.js'),
+    config = process.mainModule.exports["config"],
     adminapi = module.exports,
     logutils = require(process.mainModule.exports["corePath"] +
                        '/src/serverroot/utils/log.utils'),
@@ -28,6 +28,8 @@ var rest = require(process.mainModule.exports["corePath"] + '/src/serverroot/com
     vnConfig = require('../../vn/api/vnconfig.api'),
     fipConfig = require('../../fip/api/fipconfig.api'),
     polConfig = require('../../networkpolicies/api/policyconfig.api'),
+    sgConfig = require('../../securitygroup/api/securitygroupconfig.api'),
+    logicalRouterConfig = require('../../logicalrouters/api/logicalroutersconfig.api'),
     ipamConfig = require('../../ipaddressmanagement/api/ipamconfig.api'),
     vdnsConfig = require('../../dns/api/virtualdnsconfig.api'),
     svcTempl = require('../../services/template/api/servicetemplateconfig.api'),
@@ -1255,24 +1257,13 @@ function deleteBGPRouter (request, response, appData)
                          });
 };
 
-function getWebConfigValueByName (req, res, appData)
-{
-    var type = req.param('type'),
-        variable = req.param('variable'),
-        configObj = {}, value;
-    if(type != null && variable != null) {
-        value = ((null != config[type]) && (null != config[type][variable])) ? 
-            config[type][variable] : null;
-        configObj[variable] = value;
-    }
-    commonUtils.handleJSONResponse(null, res, configObj);
-}
-
 function getMatchStrByType (type)
 {
     switch (type) {
     case 'network-policy':
         return 'network_policys';
+    case 'logical-router':
+        return 'logical_routers';
     case 'virtual-network':
         return 'virtual_networks';
     case 'network-ipam':
@@ -1315,6 +1306,8 @@ function createReqArrByType (dataObjArr, type, obj)
     case 'virtual-network':
     case 'floating-ip':
     case 'network-policy':
+    case 'security-group':
+    case 'logical-router':
     case 'network-ipam':
     case 'virtual-DNS':
     case 'virtual-DNS-record':
@@ -1327,8 +1320,10 @@ function createReqArrByType (dataObjArr, type, obj)
 
 var configCBList = 
 {
-    'virtual-network': vnConfig.readVirtualNetworks,
+    'virtual-network': vnConfig.getPagedVirtualNetworks,
     'network-policy': polConfig.readPolicys,
+    'security-group': sgConfig.readSecurityGroup,
+    'logical-router': logicalRouterConfig.readLogicalRouter,
     'network-ipam': ipamConfig.readIpams,
     'virtual-DNS': vdnsConfig.readVirtualDNSs,
     'virtual-DNS-record': vdnsConfig.readVirtualDNSRecords,
@@ -1505,6 +1500,3 @@ exports.getGlobalASN    = getGlobalASN;
 exports.deleteBGPRouter = deleteBGPRouter;
 exports.getControlNodeDetailsFromConfig = getControlNodeDetailsFromConfig;
 exports.getApiServerDataByPage = getApiServerDataByPage;
-exports.getWebConfigValueByName = getWebConfigValueByName;
-
-
