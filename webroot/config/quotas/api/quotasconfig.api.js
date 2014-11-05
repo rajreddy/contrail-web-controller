@@ -15,8 +15,7 @@ var logutils    = require(process.mainModule.exports["corePath"] +
                           '/src/serverroot/utils/log.utils');
 var commonUtils = require(process.mainModule.exports["corePath"] +
                           '/src/serverroot/utils/common.utils');
-var config      = require(process.mainModule.exports["corePath"] +
-                          '/config/config.global.js');
+var config      = process.mainModule.exports["config"];
 var messages    = require(process.mainModule.exports["corePath"] +
                           '/src/serverroot/common/messages');
 var global      = require(process.mainModule.exports["corePath"] +
@@ -76,8 +75,50 @@ function readProjectQuotas (projectIdStr, appData, callback)
     }
     configApiServer.apiGet(quotasGetURL, appData,
                          function(error, data) {
-                         getProjectQuotasCb(error, data, appData, callback);
+                             if(data["project"]["quota"] != undefined) {
+                                 getProjectQuotasCb(error, data, appData, callback);
+                             } else     {
+                                 setProjectQuotas(projectIdStr, appData, data, callback);
+                             }    
                          });
+}
+
+/**
+ * @setProjectQuotas
+ * private function
+ * 1. Needs project uuid in string format
+ */
+function setProjectQuotas(projectIdStr, appData, data, callback) {
+    var url = "/project/";
+    url += projectIdStr ;
+    data["project"]["quota"] = {
+                                   "subnet": -1,
+                                   "virtual_machine_interface": -1,
+                                   "bgp_router": null,
+                                   "instance_ip": null,
+                                   "service_instance": null,
+                                   "network_ipam": null,
+                                   "virtual_DNS_record": null,
+                                   "service_template": null,
+                                   "global_vrouter_config": null,
+                                   "floating_ip": -1,
+                                   "virtual_router": null,
+                                   "security_group_rule": -1,
+                                   "access_control_list": null,
+                                   "defaults": null,
+                                   "security_group": -1,
+                                   "virtual_network": -1,
+                                   "virtual_DNS": null,
+                                   "floating_ip_pool": null,
+                                   "logical_router": -1
+                               };
+    configApiServer.apiPut(url, data, appData, function(err, data){
+        if (err) {
+            commonUtils.handleJSONResponse(err, response, null);
+            return;
+        }
+        readProjectQuotas(projectIdStr, appData, callback);
+    });
 }
     
 /**

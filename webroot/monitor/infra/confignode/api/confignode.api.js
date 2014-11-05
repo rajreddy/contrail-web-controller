@@ -3,7 +3,7 @@
  */
 
 var rest = require(process.mainModule.exports["corePath"] + '/src/serverroot/common/rest.api'),
-    config = require(process.mainModule.exports["corePath"] + '/config/config.global.js'),
+    config = process.mainModule.exports["config"],
     async = require('async'),
     commonUtils = require(process.mainModule.exports["corePath"] +
                           '/src/serverroot/utils/common.utils'),
@@ -38,12 +38,12 @@ function getConfigNodeDetails (req, res, appData)
     var urlLists = [];
     var resultJSON = {};
     var dataObjArr = [];
-    var excludeProcessList = ['DiscoveryService','ServiceMonitor','Schema'];
+    var excludeProcessList = ['contrail-discovery','contrail-svc-monitor','contrail-schema'];
     var genPostData = {};
     reqUrl = '/analytics/uves/config-node/' + hostName + '?flat';
     commonUtils.createReqObj(dataObjArr, reqUrl, global.HTTP_REQUEST_GET,
                              null, opApiServer, null, appData);
-    genPostData['kfilt'] = ['*:ApiServer*','*:DiscoveryService*','*:ServiceMonitor*','*:Schema*'];
+    genPostData['kfilt'] = ['*:contrail-api*','*:contrail-discovery*','*:contrail-svc-monitor*','*:contrail-schema*'];
     reqUrl = '/analytics/uves/generator';
     commonUtils.createReqObj(dataObjArr, reqUrl, global.HTTP_REQUEST_POST,
                              genPostData, opApiServer, null, appData);
@@ -75,7 +75,7 @@ function getConfigNodesSummary (req, res, appData)
     if (null != addGen) {
         reqUrl = '/analytics/uves/generator';
         var genPostData = {};
-        genPostData['kfilt'] = ['*:ApiServer*'];
+        genPostData['kfilt'] = ['*:contrail-api*'];
         genPostData['cfilt'] = ['ModuleClientState:client_info',
                                 'ModuleServerState:generator_info'];
         commonUtils.createReqObj(dataObjArr, reqUrl, global.HTTP_REQUEST_POST,
@@ -99,7 +99,7 @@ function getConfigNodesSummary (req, res, appData)
 
 function parseConfigNodeProcessUVEs (resultJSON, configProcessUVEs, host)
 {
-    var moduleList = ['ApiServer', 'DiscoveryService', 'ServiceMonitor', 'Schema'];
+    var moduleList = ['contrail-api', 'contrail-discovery', 'contrail-svc-monitor', 'contrail-schema'];
     try {
         var cfgProcUVEData = configProcessUVEs['value'];
         var cfgProcUVEDataLen = cfgProcUVEData.length;

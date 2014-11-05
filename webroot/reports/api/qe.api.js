@@ -8,7 +8,7 @@
 
 var qeapi = module.exports,
     rest = require(process.mainModule.exports["corePath"] + '/src/serverroot/common/rest.api'),
-    config = require(process.mainModule.exports["corePath"] + '/config/config.global.js'),
+    config = process.mainModule.exports["config"],
     logutils = require(process.mainModule.exports["corePath"] + '/src/serverroot/utils/log.utils'),
     commonUtils = require(process.mainModule.exports["corePath"] +
                           '/src/serverroot/utils/common.utils'),
@@ -892,13 +892,19 @@ function parseFSFilter(query, filters)
 function parseWhereANDClause(whereANDClause) 
 {
     var whereANDArray = whereANDClause.replace('(', '').replace(')', '').split(' AND '),
-        whereANDLength = whereANDArray.length, i, whereANDClause, whereANDClauseArray;
+        whereANDLength = whereANDArray.length, i, whereANDClause, whereANDClauseArray, operator = '';
     for (i = 0; i < whereANDLength; i += 1) {
         whereANDArray[i] = whereANDArray[i].trim();
         whereANDClause = whereANDArray[i];
-        whereANDClauseArray = whereANDClause.split('=');
+        if(whereANDClause.indexOf('Starts with') != -1){
+            operator = 'Starts with';
+            whereANDClauseArray = whereANDClause.split(operator);
+        } else if(whereANDClause.indexOf('=') != -1){
+            operator = '='
+            whereANDClauseArray = whereANDClause.split(operator);
+        }
         whereANDClause = {"name":"", value:"", op:""};
-        populateWhereANDClause(whereANDClause, whereANDClauseArray[0].trim(), whereANDClauseArray[1].trim(), '=');
+        populateWhereANDClause(whereANDClause, whereANDClauseArray[0].trim(), whereANDClauseArray[1].trim(), operator);
         whereANDArray[i] = whereANDClause;
     }
     return whereANDArray;
@@ -932,6 +938,8 @@ function getOperatorCode(operator)
         return 2;
     } else if (operator == 'RegEx=') {
         return 8;
+    } else if (operator == 'Starts with') {
+        return 7;
     } else {
         return -1
     }

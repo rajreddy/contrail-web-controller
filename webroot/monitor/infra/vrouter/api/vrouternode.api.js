@@ -3,7 +3,7 @@
  */
 
 var rest = require(process.mainModule.exports["corePath"] + '/src/serverroot/common/rest.api'),
-    config = require(process.mainModule.exports["corePath"] + '/config/config.global.js'),
+    config = process.mainModule.exports["config"],
     async = require('async'),
     commonUtils = require(process.mainModule.exports["corePath"] + '/src/serverroot/utils/common.utils'),
     logutils = require(process.mainModule.exports["corePath"] + '/src/serverroot/utils/log.utils'),
@@ -260,9 +260,9 @@ function getvRouterDetails (req, res, appData)
             });
         } else {
             var postData = {};
-            postData['kfilt'] = [host + ':*VRouterAgent*'];
+            postData['kfilt'] = [host + ':*contrail-vrouter-agent*'];
             infraCmn.addGeneratorInfoToUVE(postData, data, host,
-                                  ['VRouterAgent'],
+                                  ['contrail-vrouter-agent'],
                                   function(err, data) {
                 infraCmn.getDataFromConfigNode('virtual-routers', host, appData,
                                                data, function(err, data) {
@@ -329,7 +329,7 @@ function dovRouterListPostProcess (configData, uuidList, nodeList, addGen,
         }
         resultJSON =
             infraCmn.checkAndGetSummaryJSON(confData, uveData,
-                                            ['VRouterAgent']);
+                                            ['contrail-vrouter-agent']);
         callback(null, resultJSON);
     });
 }
@@ -379,7 +379,7 @@ function getvRouterDetailConfigUVEData (configData, uuidList, nodeList, addGen,
         postData['kfilt'] = [];
         if (null != nodeList) {
             var nodeCnt = nodeList.length;
-            var kfilt = ['VRouterAgent'];
+            var kfilt = ['contrail-vrouter-agent'];
             var kLen = kfilt.length;
             for (var i = 0; i < nodeCnt; i++) {
                 for (var j = 0; j < kLen; j++) {
@@ -387,7 +387,7 @@ function getvRouterDetailConfigUVEData (configData, uuidList, nodeList, addGen,
                 }
             }
         } else {
-            postData['kfilt'] = ['*:VRouterAgent*'];
+            postData['kfilt'] = ['*:contrail-vrouter-agent*'];
         }
         postData['cfilt'] = ['ModuleClientState:client_info',
                              'ModuleServerState:generator_info'];
@@ -584,6 +584,45 @@ function getvRouterL2Routes (req, res)
     });
 }
 
+function getvRouterUCast6Routes (req, res) {
+    var ip = req.param('ip');
+    var uc6index = req.param('vrfindex');
+    var index = 0;
+    var dataObjArr = [];
+    var vRouterRestAPI = commonUtils.getRestAPIServer(ip,
+                                                      global.SANDESH_COMPUTE_NODE_PORT);
+console.log("inside ipv6: " + uc6index + ' ' + ip );
+    if (null != uc6index) {
+        commonUtils.createReqObj(dataObjArr, '/Snh_Inet6UcRouteReq?vrf_index=' +
+                                 uc6index);
+        sendvRouterRoutes(req, res, dataObjArr, vRouterRestAPI);
+        return;
+    }
+    /* First get the uc6index from VRF */
+    getVrfIndexList(ip, function(results) {
+        if (null == results) {
+            commonUtils.handleJSONResponse(null, res, []);
+            return;
+        }
+        var vrfListLen = results.length;
+        for (var i = 0; i < vrfListLen; i++) {
+            commonUtils.createReqObj(dataObjArr,
+                                     '/Snh_Inet6UcRouteReq?vrf_index=' +
+                                     results[i]['uc6index']);
+        }
+        async.map(dataObjArr,
+                  commonUtils.getServerRespByRestApi(vRouterRestAPI,
+                                                     true),
+                  function(err, data) {
+            if (data) {
+                commonUtils.handleJSONResponse(null, res, data);
+            } else {
+                commonUtils.handleJSONResponse(null, res, []);
+            }
+        });
+    });
+}
+
 function sendvRouterRoutes (req, res, dataObjArr, vRouterRestAPI)
 {
     async.map(dataObjArr,
@@ -708,5 +747,7 @@ exports.getvRouterUCastRoutes = getvRouterUCastRoutes;
 exports.getvRouterMCastRoutes = getvRouterMCastRoutes;
 exports.getvRouterVrfList = getvRouterVrfList;
 exports.getvRouterL2Routes = getvRouterL2Routes;
+exports.getvRouterUCast6Routes = getvRouterUCast6Routes;
 exports.getVirtualMachineInterfacesPervRouter =
     getVirtualMachineInterfacesPervRouter
+

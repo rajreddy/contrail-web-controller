@@ -3,7 +3,7 @@
  */
 
 var rest = require(process.mainModule.exports["corePath"] + '/src/serverroot/common/rest.api'),
-    config = require(process.mainModule.exports["corePath"] + '/config/config.global.js'),
+    config = process.mainModule.exports["config"],
     adminapi = module.exports,
     logutils = require(process.mainModule.exports["corePath"] + '/src/serverroot/utils/log.utils'),
     commonUtils = require(process.mainModule.exports["corePath"] +
@@ -604,8 +604,8 @@ function getvRouterSummaryByJob (pubChannel, saveChannelKey, jobData, done)
                 var cnt = resultJSON.length;
                 for (var i = 0; i < cnt; i++) {
                     try {
-                        delete resultJSON[i]['value']['VRouterAgent'];
-                        resultJSON[i]['value']['VRouterAgent'] = {};
+                        delete resultJSON[i]['value']['contrail-vrouter-agent'];
+                        resultJSON[i]['value']['contrail-vrouter-agent'] = {};
                     } catch(e) {
                     }
                 }
@@ -741,7 +741,7 @@ function getvRouterGenByJob (pubChannel, saveChannelKey, jobData, done)
             return;
         }
         var genCnt = data.length;
-        var kfilt = ['VRouterAgent'];
+        var kfilt = ['contrail-vrouter-agent'];
         var kLen = kfilt.length;
         for (var i = 0; i < genCnt; i++) {
             for (var j = 0; j < kLen; j++) {

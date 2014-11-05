@@ -3,7 +3,7 @@
  */
 
 var rest = require(process.mainModule.exports["corePath"] + '/src/serverroot/common/rest.api'),
-    config = require(process.mainModule.exports["corePath"] + '/config/config.global.js'),
+    config = process.mainModule.exports["config"],
     async = require('async'),
     commonUtils = require(process.mainModule.exports["corePath"] +
                           '/src/serverroot/utils/common.utils'),
@@ -39,8 +39,8 @@ function getAnalyticsNodeSummary (req, res, appData)
     if (null != addGen) {
         reqUrl = '/analytics/uves/generator';
         var postData = {};
-        postData['kfilt'] = ['*:Collector*',
-                             '*:OpServer*', '*:QueryEngine*'];
+        postData['kfilt'] = ['*:contrail-collector*',
+                             '*:contrail-analytics-api*', '*:contrail-query-engine*'];
         postData['cfilt'] = ['ModuleClientState:client_info',
                              'ModuleServerState:generator_info'];
         commonUtils.createReqObj(dataObjArr, reqUrl, global.HTTP_REQUEST_POST,
@@ -116,8 +116,8 @@ function addAnalyticsQueryStatsToDetails(data, appData, callback)
 
 function postProcessAnalyticsNodeSummaryJSON (collUVEData, genUVEData)
 {
-    var moduleNames = ['QueryEngine',
-                       'OpServer', 'Collector'];
+    var moduleNames = ['contrail-query-engine',
+                       'contrail-analytics-api', 'contrail-collector'];
     var modCnt = moduleNames.length;
     var modHost = null;
     var resultJSON = [];
@@ -184,12 +184,12 @@ function getAnalyticsNodeDetails (req, res, appData)
     var hostName = req.param('hostname');
     var resultJSON = {};
     var url = '/analytics/uves/generator';
-    var excludeProcessList = ['QueryEngine'];
+    var excludeProcessList = ['contrail-query-engine'];
 
     var postData = {};
-    postData['kfilt'] = [hostName + ':*Collector*',
-                         hostName + ':*OpServer*',
-                         hostName + ':*QueryEngine*'];
+    postData['kfilt'] = [hostName + ':*contrail-collector*',
+                         hostName + ':*contrail-analytics-api*',
+                         hostName + ':*contrail-query-engine*'];
     opServer.api.post(url, postData, function(err, genData) {
         if (err || (null == genData)) {
             commonUtils.handleJSONResponse(err, res, resultJSON);
